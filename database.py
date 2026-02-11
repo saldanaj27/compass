@@ -17,9 +17,22 @@ class Database:
                 description TEXT,
                 deadline DATE,
                 status TEXT DEFAULT 'active',
+                category TEXT DEFAULT 'general',
+                context TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+        # Add columns to existing tables if they don't exist (migration)
+        try:
+            self.conn.execute("ALTER TABLE goals ADD COLUMN category TEXT DEFAULT 'general'")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
+        try:
+            self.conn.execute("ALTER TABLE goals ADD COLUMN context TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
         
         # Tasks table
         self.conn.execute("""
@@ -28,7 +41,7 @@ class Database:
                 goal_id INTEGER,
                 description TEXT NOT NULL,
                 status TEXT DEFAULT 'todo',
-                priority TEXT DEFAULT 'medium',
+                estimated_hours REAL,
                 due_date DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 completed_at TIMESTAMP,
@@ -51,10 +64,10 @@ class Database:
         
         self.conn.commit()
     
-    def add_goal(self, name: str, description: str = "", deadline: str = None) -> int:
+    def add_goal(self, name: str, description: str = "", deadline: str = None, category: str = "general", context: str = None) -> int:
         cursor = self.conn.execute(
-            "INSERT INTO goals (name, description, deadline) VALUES (?, ?, ?)",
-            (name, description, deadline)
+            "INSERT INTO goals (name, description, deadline, category, context) VALUES (?, ?, ?, ?, ?)",
+            (name, description, deadline, category, context)
         )
         self.conn.commit()
         return cursor.lastrowid
@@ -121,3 +134,59 @@ class Database:
           (task_id,)
       )
       self.conn.commit()
+
+    def get_todays_tasks(self) -> List[Dict]:
+        """Get all tasks due today"""
+        today = datetime.now().strftime("%Y-%m-%d")
+        cursor = self.conn.execute(
+            "SELECT * FROM tasks WHERE due_date = ? ORDER BY created_at",
+            (today,)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def get_yesterdays_completed_tasks(self) -> List[Dict]:
+        """Get tasks completed yesterday"""
+        from datetime import timedelta
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        cursor = self.conn.execute(
+            """SELECT t.* FROM tasks t
+               WHERE DATE(t.completed_at) = ?
+               ORDER BY t.completed_at""",
+            (yesterday,)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def get_overdue_tasks(self) -> List[Dict]:
+        """Get all tasks that are past due date and not completed"""
+        today = datetime.now().strftime("%Y-%m-%d")
+        cursor = self.conn.execute(
+            """SELECT * FROM tasks
+               WHERE due_date < ? AND status != 'done'
+               ORDER BY due_date""",
+            (today,)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def get_all_active_tasks(self) -> List[Dict]:
+        """Get all tasks that are not completed"""
+        cursor = self.conn.execute(
+            "SELECT * FROM tasks WHERE status != 'done' ORDER BY created_at"
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def get_goal(self, goal_id: int) -> Optional[Dict]:
+        """Get a specific goal by ID"""
+        cursor = self.conn.execute(
+            "SELECT * FROM goals WHERE id = ?",
+            (goal_id,)
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+    def update_goal_context(self, goal_id: int, context: str):
+        """Update the context for a specific goal"""
+        self.conn.execute(
+            "UPDATE goals SET context = ? WHERE id = ?",
+            (context, goal_id)
+        )
+        self.conn.commit()
