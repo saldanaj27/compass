@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px;
+    height: 640px;
+    background: #0d1117;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    color: #e6edf3;
+    display: flex;
+    overflow: hidden;
+  }
+  .left {
+    width: 520px;
+    padding: 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .logo {
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #58a6ff;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #f0f6fc;
+    margin-bottom: 20px;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+  .tags {
+    margin-top: 28px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    color: #8b949e;
+  }
+  .right {
+    flex: 1;
+    padding: 40px 40px 40px 20px;
+    display: flex;
+    align-items: center;
+  }
+  .terminal {
+    width: 100%;
+    background: #161b22;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  }
+  .terminal-bar {
+    height: 36px;
+    background: #1c2128;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #f85149; }
+  .dot-y { background: #d29922; }
+  .dot-g { background: #3fb950; }
+  .terminal-title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: #484f58;
+    margin-right: 48px;
+  }
+  .terminal-body {
+    padding: 20px 22px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .dim { color: #484f58; }
+  .blue { color: #58a6ff; }
+  .green { color: #3fb950; }
+  .white { color: #e6edf3; }
+  .muted { color: #8b949e; }
+  .prompt { color: #8b949e; }
+  .response { color: #c9d1d9; }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="logo">compass</div>
+    <h1>An AI agent that keeps you accountable.</h1>
+    <div class="subtitle">
+      Talk to it. It remembers. It pushes back.<br>
+      Built with Claude, Python, and SQLite.
+    </div>
+    <div class="tags">
+      <span class="tag">ai-agent</span>
+      <span class="tag">cli</span>
+      <span class="tag">accountability</span>
+      <span class="tag">python</span>
+      <span class="tag">claude</span>
+    </div>
+  </div>
+  <div class="right">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="terminal-title">compass</div>
+      </div>
+      <div class="terminal-body">
+        <span class="dim">$</span> <span class="blue">compass</span><br><br>
+        <span class="muted">Goals:</span><br>
+        <span class="white">&nbsp;&nbsp;Build ML Portfolio (3/8 tasks)</span><br>
+        <span class="white">&nbsp;&nbsp;Learn Transformers (1/6 tasks)</span><br><br>
+        <span class="muted">Tasks: 2 due today | 1 overdue</span><br><br>
+        <span class="prompt">&gt;</span> <span class="white">I haven't started the transformer implementation</span><br><br>
+        <span class="response">That's been on your list for 10 days. Open a</span><br>
+        <span class="response">notebook and implement attention in 20 lines of</span><br>
+        <span class="response">NumPy first. Can you do that tonight?</span><br><br>
+        <span class="prompt">&gt;</span> <span class="white">yeah that sounds manageable</span><br><br>
+        <span class="response">Good. What time are you sitting down?</span><br><br>
+        <span class="prompt">&gt;</span> <span class="green">/done 12</span><br>
+        <span class="green">&nbsp;&nbsp;Done! Task 12 complete.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
