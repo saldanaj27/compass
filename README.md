@@ -13,34 +13,36 @@ $ compass
 
   compass
 
-  Hey Javier. Here's where things stand:
+  Hey Alex. Here's where things stand:
 
   Goals:
-    Land FAANG Job (3/8 tasks) — due 2026-04-30
-    Master System Design (1/5 tasks)
+    Build ML Portfolio (3/8 tasks) — due 2026-05-01
+    Learn Transformers from Scratch (1/6 tasks)
 
   Tasks: 2 due today | 1 overdue | 10 active
 
   Talk to me, or type /help for commands.
 
-  > I haven't touched the system design stuff in a week
+  > I haven't started the transformer implementation yet
 
-  You said system design was your biggest weakness three weeks ago.
-  What specifically is making you avoid it?
+  That's been on your list for 10 days. You said you understood
+  the attention mechanism conceptually but hadn't coded it.
+  What's the actual blocker — is it the math or the PyTorch setup?
 
-  > I don't know where to start, it feels overwhelming
+  > the math honestly, I keep re-reading the paper and getting lost
 
-  Start with one thing: pick a single system (URL shortener, chat app)
-  and design it on paper for 30 minutes. No pressure to get it right.
-  Can you do that today?
+  Stop re-reading. Open a notebook and implement scaled dot-product
+  attention in 20 lines of NumPy first. No PyTorch, no full model.
+  Just Q, K, V matrices and the attention formula. Can you do that tonight?
 
-  > yeah I can do that after lunch
+  > yeah that sounds way more manageable
 
-  Good. I'll ask you about it next time. Which system are you picking?
+  Good. Once that clicks, the rest is just stacking layers.
+  What time are you sitting down to do it?
 
-  > URL shortener
+  > after dinner, around 8
 
-  Solid choice, it's a classic starter. Go do it after lunch.
+  I'll ask you about it tomorrow. Go make it work.
 
   > /done 12
 
@@ -53,11 +55,11 @@ $ compass
 
 ## Why Compass
 
-**It remembers you.** Your profile builds automatically from conversations. Tell it you're weak on system design once — it won't ask again, but it will hold you to improving it.
+**It remembers you.** Your profile builds automatically from conversations. Tell it you're struggling with attention mechanisms once — it won't ask again, but it will hold you to working through it.
 
 **It's direct.** No "great job!" for doing the bare minimum. Compass asks what's blocking you, calls out avoidance, and pushes you to be specific about commitments.
 
-**It's personal.** When you add a goal, Compass asks about YOUR situation before generating tasks. Not generic "study 20 hours of algorithms" — specific tasks based on your experience, weaknesses, and timeline.
+**It's personal.** When you add a goal, Compass asks about YOUR situation before generating tasks. Not generic "study ML for 40 hours" — specific tasks based on your background, gaps, and timeline.
 
 **It's local.** Your data stays on your machine in a SQLite database. Only API calls go to Anthropic's Claude for conversation. No accounts, no cloud sync, no tracking.
 
@@ -104,9 +106,9 @@ compass new             # Create a new goal
 When you create a goal, Compass doesn't just add it to a list. It starts a conversation to understand your situation:
 
 ```
-$ compass new "Land a FAANG job" --category career
+$ compass new "Build an ML portfolio" --category learning
 
-  Created: Land a FAANG job (ID: 1)
+  Created: Build an ML portfolio (ID: 1)
 
   Let me ask a few questions to create the right tasks. Ready? [Y/n]: y
 
@@ -114,15 +116,16 @@ $ compass new "Land a FAANG job" --category career
     Current Role: Software Engineer
     Experience Years: 3
 
-  You're a software engineer with 3 years of experience going after FAANG.
-  What level are you targeting, and have you started any interview prep?
+  You're a software engineer looking to build an ML portfolio.
+  What's your current ML experience — have you trained models before,
+  or are you starting from fundamentals?
 
-  > L4/L5, I did some leetcode 6 months ago but I'm rusty
+  > I've done some tutorials and a Kaggle competition but nothing production-level
 
-  Got it. What's your biggest weak spot right now — algorithms,
-  system design, or behavioral?
+  Got it. Are you building this portfolio to transition into an ML role,
+  or to add ML skills to your current work?
 
-  > system design for sure
+  > transition into an ML engineer role
 
   go
 
@@ -130,16 +133,16 @@ $ compass new "Land a FAANG job" --category career
 
   Generating tasks...
 
-  1. System Design Fundamentals — core patterns and trade-offs (10h) — due 2026-03-01
-  2. Design 5 classic systems on paper (8h) — due 2026-03-10
-  3. Refresh Leetcode mediums — 30 key problems (15h) — due 2026-03-15
-  4. Update resume for L4/L5 FAANG roles (3h) — due 2026-02-20
-  5. Schedule 2 mock system design interviews (4h) — due 2026-03-20
+  1. Implement a transformer from scratch in PyTorch (12h) — due 2026-03-01
+  2. Build end-to-end NLP project with dataset, training, eval (15h) — due 2026-03-15
+  3. Deploy a model with FastAPI + write a technical blog post (8h) — due 2026-03-22
+  4. Contribute to an open-source ML library (6h) — due 2026-04-01
+  5. Build a computer vision project with real-world dataset (10h) — due 2026-04-15
 
   Add these tasks? [Y/n]:
 ```
 
-Notice: it used your profile (SWE, 3 years) and your answers (system design weakness, L4/L5 target) to generate tasks specific to you.
+Notice: it used your profile (SWE, 3 years) and your answers (tutorial-level ML, wants to transition) to generate tasks specific to you.
 
 ### 2. Daily Check-in
 
@@ -148,21 +151,23 @@ Compass holds you accountable with daily conversations that reference your actua
 ```
 $ compass checkin
 
-  You have 1 overdue task and 3 due today. Yesterday you completed
-  the resume update. What are you starting with this morning?
+  You have 1 overdue task and 2 due today. Yesterday you finished
+  the data preprocessing pipeline. What are you working on today?
 
-  > the leetcode problems
+  > I need to start training the model but I'm not sure about hyperparameters
 
-  Good. How many are you aiming for today?
+  You've been researching hyperparameters for three days. Pick reasonable
+  defaults, train a baseline, and iterate from there. What learning rate
+  are you starting with?
 
-  > 5 medium problems
+  > fine, 1e-4 with AdamW
 
-  That's ambitious for one session. Are you setting a time limit
-  or going until all 5 are done?
+  Good call. Set a 2-hour training run and evaluate. Don't tune anything
+  until you have baseline metrics. When are you starting?
 
-  > 2 hours max
+  > right now
 
-  Reasonable. Go. Tell me how it went when you're done.
+  Go. Come back with your loss curves.
 
   > done
 
