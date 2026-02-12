@@ -1,102 +1,74 @@
-# Compass - Personal AI Task Agent
+# Compass — Development Guide
 
-## Project Overview
-An AI-powered task management agent that helps users stay accountable to their goals. Built for personal use, designed to be extended into a multi-domain life management system.
+## What This Is
 
-## Current State (V1)
-Basic CLI tool with:
-- Goal and task management
-- AI-powered goal breakdown
-- Daily check-ins
-- Simple completion tracking (done/not done, no hours)
+A personal AI accountability agent. CLI-first, local-first, conversation-driven. Users talk to Compass to set goals, get personalized tasks, and stay accountable through daily check-ins.
 
-## Tech Stack
-- **Language**: Python 3.11+
-- **AI**: Anthropic Claude API (Sonnet 4)
-- **Database**: SQLite (local, simple, no auth needed)
-- **CLI**: Click library
-- **Future**: FastAPI web UI
+The agent learns about the user over time through a hybrid context system (global profile + goal-specific context).
 
-## Architecture Philosophy
-- **Start simple**: CLI-first, add web UI later
-- **Local-first**: No cloud dependencies except Claude API
-- **Completion-based**: Tasks are binary (done/not done), not time-based
-- **Dogfooding**: Built for personal use, must actually be useful
+## Architecture
 
-## Code Style
-- Type hints everywhere
-- Clear function names (no abbreviations)
-- Fail fast with helpful error messages
-- Keep functions small (<30 lines)
-- Comments only for "why", not "what"
-
-## Database Schema
-- **goals**: High-level objectives with deadlines
-- **tasks**: Specific actions (completion-based, not hours)
-- **daily_logs**: What was accomplished each day
-- Priority over precision - simple is better
-
-## Agent Design Principles
-1. **Be helpful, not annoying**: Proactive but not pushy
-2. **Learn patterns**: Track what user actually does vs plans
-3. **No markdown in CLI**: Strip formatting for clean terminal output
-4. **Context-aware**: Remember conversation history within session
-5. **Conversational**: Natural language, not robotic
-
-## Current Focus (Week 1-2)
-- Core CRUD operations working smoothly
-- Clean, usable CLI experience
-- Agent can break down goals intelligently
-- Daily check-in feels natural and useful
-
-## Known Issues / TODO
-- [ ] Tasks can't be edited (only deleted and recreated)
-- [ ] No way to set task priority
-- [ ] Daily logs don't link to specific tasks yet
-- [ ] Agent doesn't remember context across sessions
-- [ ] No weekly review feature yet
-
-## Future Vision (V2+)
-- Web UI for better visualization
-- Calendar integration (Google Calendar)
-- Proactive notifications (desktop/mobile)
-- Pattern analysis ("you're most productive 9-11am")
-- Multi-domain: finance, health, learning tracking
-- Background agent that runs 24/7
-
-## Testing Approach
-- Manual testing via CLI (primary user is me)
-- Add unit tests for database operations
-- Integration tests for agent conversations
-- Goal: 80%+ code coverage before V2
-
-## Commands Reference
-```bash
-# Goals
-add-goal <name> [--description] [--deadline]
-list-goals
-delete-goal <id>
-
-# Tasks  
-add-task <goal_id> <description> [--due]
-list-tasks <goal_id>
-done <task_id>
-undone <task_id>
-delete-task <task_id>
-
-# Agent
-checkin  # Daily check-in conversation
+```
+main.py       — CLI entry point (Click), interactive mode, all commands
+agent.py      — Claude API calls, system prompts, conversation management
+database.py   — SQLite CRUD (goals, tasks, daily_logs)
+user_profile.py — User profile management (~/.compass/user_profile.json)
 ```
 
-## Development Workflow
-1. Use the tool daily (dogfooding)
-2. Note what's annoying or missing
-3. Build that feature next
-4. Repeat
+### Key Design Patterns
 
-## Notes for AI Assistants
-- This is a personal project, not enterprise software
-- Optimize for "works well for one person" not "scales to millions"
-- User is the developer, so rough edges are okay early on
-- Focus on features that are immediately useful, not future-proofing
-- When suggesting code, match the existing style exactly
+**Interactive mode** (`compass` with no args): Opens a conversation loop. The agent gets a rich system prompt with all goals, tasks, overdue items, and profile data. Inline `/commands` handle actions (mark done, list tasks). Everything else goes to Claude as conversation.
+
+**Conversational goal setup** (`compass new`): Discovery conversation asks clarifying questions before generating tasks. After conversation, agent extracts profile updates and saves them. Tasks are generated using both profile and goal-specific context.
+
+**Hybrid context system**:
+- `~/.compass/user_profile.json` — Global facts about the user (role, experience, strengths, weaknesses). Partitioned by category (career, health, finance, learning). Auto-updated from conversations.
+- `goals.context` column — JSON blob with goal-specific context from the discovery conversation.
+- Both are fed into prompts so the agent doesn't re-ask questions it already knows.
+
+**conversation_turn()** — The central method for all multi-turn conversations. Takes message history + system prompt. Used by interactive mode, check-in, and goal discovery. The system prompt changes based on context.
+
+## Database Schema
+
+```sql
+goals     — id, name, description, deadline, status, category, context, created_at
+tasks     — id, goal_id, description, status, estimated_hours, due_date, created_at, completed_at
+daily_logs — id, date, task_id, hours_spent, notes, created_at
+```
+
+The `context` column on goals stores JSON from the discovery conversation. The `category` column maps to profile categories (career, health, etc.).
+
+Migration is handled inline in `create_tables()` with try/except ALTER TABLE calls.
+
+## Code Style
+
+- Type hints on function signatures
+- Clear function names, no abbreviations
+- Functions under 30 lines where possible
+- Comments explain "why", not "what"
+- No markdown in CLI output — `_clean_markdown()` strips it
+- All prompts include current date via `_today()`
+- Consistent 2-space indentation for CLI output
+
+## Agent Personality
+
+Direct and firm. Not a supportive coach. Asks pointed questions. Names avoidance when it sees it. Keeps responses to 2-4 sentences. Always ends with a question or next step. Plain conversational text, no formatting.
+
+## Adding Features
+
+When adding a new feature:
+1. If it's a user action, add it as both a CLI subcommand AND an inline `/command` in `handle_inline_command()`
+2. If it needs AI, add a method to `agent.py` with a focused system prompt
+3. If it needs data, add methods to `database.py` (use try/except ALTER TABLE for migrations)
+4. If it learns about the user, update the profile via `profile.update_category()`
+5. Keep the interactive mode system prompt updated in `build_interactive_system_prompt()`
+
+## Known Limitations
+
+- No cross-session conversation memory (agent doesn't remember past check-ins)
+- Profile learning is one-way (extracts from conversation, no manual editing of learned facts)
+- No subtasks or task editing (delete and recreate)
+- No weekly/monthly review features yet
+- Exit keywords in conversation are exact match only ("done", "exit", "bye", "quit")
+
+See `FUTURE.md` for the full roadmap.
